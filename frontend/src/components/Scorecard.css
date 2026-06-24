@@ -1,0 +1,30 @@
+.score-card {
+  background: #161b22;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 25px 0;
+}
+
+.overall-score {
+  font-size: 48px;
+  font-weight: bold;
+}
+
+.good {
+  color: #238636;
+}
+
+.average {
+  color: #d29922;
+}
+
+.bad {
+  color: #da3633;
+}
+
+.metrics {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
