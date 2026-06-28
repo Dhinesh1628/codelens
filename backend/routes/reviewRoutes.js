@@ -1,8 +1,8 @@
-import express from "express";
-import { reviewPullRequest } from "../controllers/reviewController.js";
+import express from 'express'
+import { reviewPullRequest, getHistory } from '../controllers/reviewController.js'
 
-const router = express.Router();
+const router = express.Router()
+router.get('/', reviewPullRequest)
+router.get('/history', getHistory)
 
-router.get("/", reviewPullRequest);
-
-export default router;
+export default router

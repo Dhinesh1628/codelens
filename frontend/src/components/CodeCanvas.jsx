@@ -36,40 +36,35 @@ export default function CodeCanvas() {
     resize()
     window.addEventListener('resize', resize)
 
-    // Floating code particles
     const particles = Array.from({ length: 22 }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
       text: CODE_SNIPPETS[Math.floor(Math.random() * CODE_SNIPPETS.length)],
       speed: 0.12 + Math.random() * 0.18,
       opacity: 0.04 + Math.random() * 0.08,
-      size: 10 + Math.random() * 3,
     }))
 
-    // Scan beam state
     let scanY = 0
-    let scanDir = 1
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       // Grid dots
-      ctx.fillStyle = 'rgba(59,130,246,0.06)'
-      const gap = 36
+      ctx.fillStyle = 'rgba(59,130,246,0.05)'
+      const gap = 40
       for (let x = 0; x < canvas.width; x += gap) {
         for (let y = 0; y < canvas.height; y += gap) {
           ctx.beginPath()
-          ctx.arc(x, y, 0.9, 0, Math.PI * 2)
+          ctx.arc(x, y, 0.8, 0, Math.PI * 2)
           ctx.fill()
         }
       }
 
       // Floating code lines
-      ctx.font = `500 12px "JetBrains Mono", monospace`
+      ctx.font = '12px "JetBrains Mono", monospace'
       particles.forEach(p => {
-        // Brighten near scan beam
         const dist = Math.abs(p.y - scanY)
-        const boost = dist < 80 ? (1 - dist / 80) * 0.35 : 0
+        const boost = dist < 80 ? (1 - dist / 80) * 0.3 : 0
         ctx.fillStyle = `rgba(99,179,237,${p.opacity + boost})`
         ctx.fillText(p.text, p.x, p.y)
         p.y -= p.speed
@@ -80,28 +75,27 @@ export default function CodeCanvas() {
         }
       })
 
-      // Scan beam
+      // Scan beam gradient
       const beamH = 120
       const grad = ctx.createLinearGradient(0, scanY - beamH, 0, scanY + beamH)
       grad.addColorStop(0,   'rgba(59,130,246,0)')
-      grad.addColorStop(0.4, 'rgba(59,130,246,0.04)')
-      grad.addColorStop(0.5, 'rgba(99,179,237,0.10)')
-      grad.addColorStop(0.6, 'rgba(59,130,246,0.04)')
+      grad.addColorStop(0.45,'rgba(59,130,246,0.04)')
+      grad.addColorStop(0.5, 'rgba(99,179,237,0.09)')
+      grad.addColorStop(0.55,'rgba(59,130,246,0.04)')
       grad.addColorStop(1,   'rgba(59,130,246,0)')
       ctx.fillStyle = grad
       ctx.fillRect(0, scanY - beamH, canvas.width, beamH * 2)
 
-      // Scan line (sharp)
-      ctx.strokeStyle = 'rgba(99,179,237,0.25)'
+      // Scan line
+      ctx.strokeStyle = 'rgba(99,179,237,0.22)'
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(0, scanY)
       ctx.lineTo(canvas.width, scanY)
       ctx.stroke()
 
-      // Move scan
-      scanY += scanDir * 0.7
-      if (scanY > canvas.height + beamH) { scanY = -beamH; }
+      scanY += 0.7
+      if (scanY > canvas.height + beamH) scanY = -beamH
 
       animId = requestAnimationFrame(draw)
     }
@@ -117,10 +111,13 @@ export default function CodeCanvas() {
     <canvas
       ref={canvasRef}
       style={{
-        position: 'fixed', inset: 0,
-        width: '100%', height: '100%',
-        pointerEvents: 'none', zIndex: -1,
-        opacity: 1,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: 0,
       }}
     />
   )

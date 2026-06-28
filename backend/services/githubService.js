@@ -28,11 +28,16 @@ export const fetchPullRequestData = async (url) => {
 
   console.log("PR API URL:", prApiUrl);
 
+  const githubHeaders = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "CodeLens",
+    ...(process.env.GITHUB_TOKEN && {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    }),
+  };
+
   const prResponse = await fetch(prApiUrl, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "User-Agent": "CodeLens",
-    },
+    headers: githubHeaders,
   });
 
   if (!prResponse.ok) {
@@ -48,10 +53,7 @@ export const fetchPullRequestData = async (url) => {
   const filesApiUrl = `https://api.github.com/repos/${owner}/${repo}/pulls/${pullNumber}/files`;
 
   const filesResponse = await fetch(filesApiUrl, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      "User-Agent": "CodeLens",
-    },
+    headers: githubHeaders,
   });
 
   if (!filesResponse.ok) {
