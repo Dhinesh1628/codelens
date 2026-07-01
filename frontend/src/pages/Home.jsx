@@ -1,127 +1,101 @@
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
+import CodeCanvas from '../components/CodeCanvas.jsx'
+import './Home.css'
 
-const CODE_SNIPPETS = [
-  'const auth = jwt.verify(token)',
-  'if (err) throw new Error()',
-  'SELECT * FROM users WHERE',
-  'npm run build --prod',
-  'git diff HEAD~1',
-  'async function fetchPR()',
-  'res.status(401).json()',
-  'export default function()',
-  '.filter(f => f.status)',
-  'await Promise.all(files)',
-  'const score = avg / 10',
-  'import { useState }',
-  'try { } catch (err) { }',
-  'return res.json({ ok })',
-  '@deprecated // remove',
-  'TODO: fix race condition',
-  'SECURITY: SQL injection',
-  'type Score = number',
-]
+export default function Home() {
+  const [url, setUrl] = useState('')
+  const navigate = useNavigate()
+  const { isLoggedIn } = useAuth()
 
-export default function CodeCanvas() {
-  const canvasRef = useRef(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext('2d')
-    let animId
-
-    const resize = () => {
-      canvas.width  = window.innerWidth
-      canvas.height = window.innerHeight
+  const handleReview = () => {
+    const match = url.match(/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/)
+    if (!match) {
+      alert('Paste a valid GitHub PR URL')
+      return
     }
-    resize()
-    window.addEventListener('resize', resize)
-
-    // Floating code particles
-    const particles = Array.from({ length: 22 }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      text: CODE_SNIPPETS[Math.floor(Math.random() * CODE_SNIPPETS.length)],
-      speed: 0.12 + Math.random() * 0.18,
-      opacity: 0.04 + Math.random() * 0.08,
-      size: 10 + Math.random() * 3,
-    }))
-
-    // Scan beam state
-    let scanY = 0
-    let scanDir = 1
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      // Grid dots
-      ctx.fillStyle = 'rgba(59,130,246,0.06)'
-      const gap = 36
-      for (let x = 0; x < canvas.width; x += gap) {
-        for (let y = 0; y < canvas.height; y += gap) {
-          ctx.beginPath()
-          ctx.arc(x, y, 0.9, 0, Math.PI * 2)
-          ctx.fill()
-        }
-      }
-
-      // Floating code lines
-      ctx.font = `500 12px "JetBrains Mono", monospace`
-      particles.forEach(p => {
-        // Brighten near scan beam
-        const dist = Math.abs(p.y - scanY)
-        const boost = dist < 80 ? (1 - dist / 80) * 0.35 : 0
-        ctx.fillStyle = `rgba(99,179,237,${p.opacity + boost})`
-        ctx.fillText(p.text, p.x, p.y)
-        p.y -= p.speed
-        if (p.y < -20) {
-          p.y = canvas.height + 20
-          p.x = Math.random() * canvas.width
-          p.text = CODE_SNIPPETS[Math.floor(Math.random() * CODE_SNIPPETS.length)]
-        }
-      })
-
-      // Scan beam
-      const beamH = 120
-      const grad = ctx.createLinearGradient(0, scanY - beamH, 0, scanY + beamH)
-      grad.addColorStop(0,   'rgba(59,130,246,0)')
-      grad.addColorStop(0.4, 'rgba(59,130,246,0.04)')
-      grad.addColorStop(0.5, 'rgba(99,179,237,0.10)')
-      grad.addColorStop(0.6, 'rgba(59,130,246,0.04)')
-      grad.addColorStop(1,   'rgba(59,130,246,0)')
-      ctx.fillStyle = grad
-      ctx.fillRect(0, scanY - beamH, canvas.width, beamH * 2)
-
-      // Scan line (sharp)
-      ctx.strokeStyle = 'rgba(99,179,237,0.25)'
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.moveTo(0, scanY)
-      ctx.lineTo(canvas.width, scanY)
-      ctx.stroke()
-
-      // Move scan
-      scanY += scanDir * 0.7
-      if (scanY > canvas.height + beamH) { scanY = -beamH; }
-
-      animId = requestAnimationFrame(draw)
-    }
-
-    draw()
-    return () => {
-      cancelAnimationFrame(animId)
-      window.removeEventListener('resize', resize)
-    }
-  }, [])
+    navigate(`/review/${match[1]}/${match[2]}/${match[3]}`)
+  }
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: 'fixed', inset: 0,
-        width: '100%', height: '100%',
-        pointerEvents: 'none', zIndex: -1,
-        opacity: 1,
-      }}
-    />
+    <div className="home-wrap">
+      <CodeCanvas />
+
+      <div className="home-inner">
+        <div className="home-topbar">
+          <div className="logo-row">
+            <div className="logo-icon">🔍</div>
+            <div>
+              <div className="logo-name">CodeLens</div>
+              <div className="logo-badge">AI PR review</div>
+            </div>
+          </div>
+
+          <div className="home-auth-btns">
+            {isLoggedIn ? (
+              <button className="btn-dashboard" onClick={() => navigate('/dashboard')}>Dashboard</button>
+            ) : (
+              <>
+                <Link className="btn-login" to="/login">Log in</Link>
+                <Link className="btn-signup" to="/register">Sign up</Link>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="home-hero">
+          <div className="home-eyebrow">⚡ Instant code review insights</div>
+          <h1 className="home-h1">
+            Review pull requests in a <span>single command</span>
+          </h1>
+          <p className="home-tagline">
+            Drop in a GitHub PR URL and get a fast, structured AI review with quality, security, and readability signals.
+          </p>
+        </div>
+
+        <div className="terminal-box">
+          <div className="terminal-top">
+            <span className="term-dot r" />
+            <span className="term-dot y" />
+            <span className="term-dot g" />
+            <span className="term-label">codelens review</span>
+          </div>
+          <div className="terminal-input-row">
+            <span className="term-prompt">$</span>
+            <input
+              type="text"
+              placeholder="https://github.com/owner/repo/pull/42"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleReview()}
+            />
+          </div>
+        </div>
+
+        <button className="btn-review" onClick={handleReview}>
+          <span>Analyze PR</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M5 12h14" />
+            <path d="m13 6 6 6-6 6" />
+          </svg>
+        </button>
+
+        <div className="home-stats">
+          <div className="home-stat">
+            <div className="home-stat-val">4D</div>
+            <div className="home-stat-label">Faster review loops</div>
+          </div>
+          <div className="home-stat">
+            <div className="home-stat-val">10/10</div>
+            <div className="home-stat-label">Signal quality</div>
+          </div>
+          <div className="home-stat">
+            <div className="home-stat-val">100%</div>
+            <div className="home-stat-label">Actionable insights</div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
