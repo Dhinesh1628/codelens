@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import FileDiff from '../components/FileDiff.jsx'
 import Loader from '../components/Loader.jsx'
+import { API_BASE_URL } from '../api.js'
 import './Review.css'
 
 function ScoreRing({ avg }) {
@@ -62,7 +63,12 @@ export default function Review() {
 
   useEffect(() => {
     setLoading(true); setError(''); setData(null)
-    fetch(`http://localhost:5000/api/review?url=${encodeURIComponent(url)}`)
+    const token = localStorage.getItem('cl_token')
+    fetch(`${API_BASE_URL}/api/review?url=${encodeURIComponent(url)}`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    })
       .then(async r => {
         const json = await r.json()
         if (!r.ok) throw new Error(json.error || json.message || 'Failed to fetch review.')

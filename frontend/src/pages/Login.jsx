@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import CodeCanvas from '../components/CodeCanvas.jsx'
+import { API_BASE_URL } from '../api.js'
 import './Auth.css'
 
 export default function Login() {
@@ -14,7 +15,7 @@ export default function Login() {
   const handleSubmit = async () => {
     setError(''); setLoading(true)
     try {
-      const res = await fetch('http://localhost:5000/api/auth/login', {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

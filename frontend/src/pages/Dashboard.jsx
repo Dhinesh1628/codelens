@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { API_BASE_URL as API } from '../api.js'
 import './Dashboard.css'
-
-const API = 'http://localhost:5000'
 
 export default function Dashboard() {
   const { user, token, logout } = useAuth()
